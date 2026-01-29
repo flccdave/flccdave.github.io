@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #fef2f2 0%, #fed7aa 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        body.break-mode {
+            background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%);
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 48px;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .status {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .timer-display {
+            background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+            border-radius: 16px;
+            padding: 48px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+            text-align: center;
+            transition: background 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .timer-display.break-mode {
+            background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .time {
+            font-size: 72px;
+            font-weight: bold;
+            color: white;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .mode {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        button {
+            background: #1f2937;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background: #374151;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button.reset {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        button.reset:hover {
+            background: #d1d5db;
+        }
+
+        .info {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .settings {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .setting-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-label {
+            color: #4b5563;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .setting-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #ef4444;
+        }
+
+        .unit {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        svg {
+            width: 32px;
+            height: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Pomodoro Timer</h1>
+            <p class="status" id="status">🍅 Focus Time</p>
+        </div>
+
+        <div class="settings">
+            <div class="settings-title">Settings</div>
+            <div class="setting-group">
+                <label class="setting-label" for="workTime">Work Time</label>
+                <div class="setting-input">
+                    <input type="number" id="workTime" min="1" max="60" value="1">
+                    <span class="unit">min</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label" for="breakTime">Break Time</label>
+                <div class="setting-input">
+                    <input type="number" id="breakTime" min="1" max="60" value="1">
+                    <span class="unit">min</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="timer-display">
+            <div class="time" id="time">01:00</div>
+            <div class="mode" id="mode">Work</div>
+        </div>
+
+        <div class="controls">
+            <button id="playPauseBtn" aria-label="Play/Stop">
+                <svg id="playIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <svg id="stopIcon" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                </svg>
+            </button>
+            <button id="resetBtn" class="reset" aria-label="Reset">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let minutes = 1;
+        let seconds = 0;
+        let isActive = false;
+        let isBreak = false;
+        let intervalId = null;
+
+        const timeDisplay = document.getElementById('time');
+        const modeDisplay = document.getElementById('mode');
+        const statusDisplay = document.getElementById('status');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const playIcon = document.getElementById('playIcon');
+        const stopIcon = document.getElementById('stopIcon');
+        const workTimeInput = document.getElementById('workTime');
+        const breakTimeInput = document.getElementById('breakTime');
+        const timerDisplayEl = document.querySelector('.timer-display');
+
+        function getWorkTime() {
+            return parseInt(workTimeInput.value) || 1;
+        }
+
+        function getBreakTime() {
+            return parseInt(breakTimeInput.value) || 1;
+        }
+
+        function formatTime(mins, secs) {
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timeDisplay.textContent = formatTime(minutes, seconds);
+            modeDisplay.textContent = isBreak ? 'Break' : 'Work';
+            statusDisplay.textContent = isBreak ? '☕ Break Time' : '🍅 Focus Time';
+            
+            // Update background colors based on mode
+            if (isBreak) {
+                document.body.classList.add('break-mode');
+                timerDisplayEl.classList.add('break-mode');
+            } else {
+                document.body.classList.remove('break-mode');
+                timerDisplayEl.classList.remove('break-mode');
+            }
+        }
+
+        function playWorkEndSound() {
+            // Create a bell-like sound for work session end
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+            
+            // Add second chime
+            setTimeout(() => {
+                const osc2 = audioContext.createOscillator();
+                const gain2 = audioContext.createGain();
+                
+                osc2.connect(gain2);
+                gain2.connect(audioContext.destination);
+                
+                osc2.frequency.value = 1000;
+                osc2.type = 'sine';
+                
+                gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                osc2.start(audioContext.currentTime);
+                osc2.stop(audioContext.currentTime + 0.5);
+            }, 200);
+        }
+
+        function playBreakEndSound() {
+            // Create a triple beep sound for break session end
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 600;
+                    oscillator.type = 'square';
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.15);
+                }, i * 200);
+            }
+        }
+
+        function tick() {
+            if (seconds === 0) {
+                if (minutes === 0) {
+                    // Play different sounds based on which timer ended
+                    if (isBreak) {
+                        playBreakEndSound(); // Break ended, back to work
+                        minutes = getWorkTime();
+                        isBreak = false;
+                    } else {
+                        playWorkEndSound(); // Work ended, time for break
+                        minutes = getBreakTime();
+                        isBreak = true;
+                    }
+                    seconds = 0;
+                    updateDisplay();
+                    // Timer continues automatically, don't stop
+                } else {
+                    minutes--;
+                    seconds = 59;
+                }
+            } else {
+                seconds--;
+            }
+            updateDisplay();
+        }
+
+        function togglePlayPause() {
+            isActive = !isActive;
+            
+            if (isActive) {
+                playIcon.style.display = 'none';
+                stopIcon.style.display = 'block';
+                intervalId = setInterval(tick, 1000);
+                // Disable inputs while timer is running
+                workTimeInput.disabled = true;
+                breakTimeInput.disabled = true;
+            } else {
+                playIcon.style.display = 'block';
+                stopIcon.style.display = 'none';
+                if (intervalId) {
+                    clearInterval(intervalId);
+                }
+                // Enable inputs when timer is stopped
+                workTimeInput.disabled = false;
+                breakTimeInput.disabled = false;
+            }
+        }
+
+        function reset() {
+            isActive = false;
+            isBreak = false;
+            minutes = getWorkTime();
+            seconds = 0;
+            
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            
+            playIcon.style.display = 'block';
+            stopIcon.style.display = 'none';
+            workTimeInput.disabled = false;
+            breakTimeInput.disabled = false;
+            updateDisplay();
+        }
+
+        // Update timer display when work time input changes
+        workTimeInput.addEventListener('input', function() {
+            if (!isActive && !isBreak) {
+                minutes = getWorkTime();
+                seconds = 0;
+                updateDisplay();
+            }
+        });
+
+        // Update timer display when break time input changes
+        breakTimeInput.addEventListener('input', function() {
+            if (!isActive && isBreak) {
+                minutes = getBreakTime();
+                seconds = 0;
+                updateDisplay();
+            }
+        });
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        resetBtn.addEventListener('click', reset);
+
+        updateDisplay();
+    </script>
+</body>
+</html>
