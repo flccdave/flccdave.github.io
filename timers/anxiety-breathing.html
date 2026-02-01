@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breathe - Anxiety Relief</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --brand-blue: #0046ad;
+            --brand-red: #dc2626;
+        }
+
+        body {
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        /* The Main Breathing Circle */
+        #circle-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s linear;
+        }
+
+        #breathing-circle {
+            width: 100%;
+            height: 100%;
+            background-color: var(--brand-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 70, 173, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        /* The Progress Ring (SVG) */
+        #progress-ring-svg {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 320px;
+            height: 320px;
+            transform: rotate(-90deg);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.1s linear;
+            stroke: var(--brand-blue);
+            stroke-width: 8;
+            fill: transparent;
+            stroke-linecap: round;
+        }
+
+        /* Controls Panel */
+        #controls {
+            margin-top: 4rem;
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            max-width: 400px;
+            width: 90%;
+            z-index: 20;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        input {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--brand-blue);
+        }
+
+        .btn {
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            transition: opacity 0.2s, transform 0.1s;
+            flex: 1;
+        }
+
+        #start-btn {
+            background-color: var(--brand-blue);
+        }
+
+        #stop-btn {
+            background-color: var(--brand-red);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        #status-text {
+            margin-top: 1rem;
+            font-size: 1.25rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            height: 2rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="circle-container">
+        <!-- SVG for the 'Hold' phase wiping animation -->
+        <svg id="progress-ring-svg">
+            <circle
+                class="progress-ring__circle"
+                stroke-dasharray="942.48" 
+                stroke-dashoffset="942.48"
+                r="150"
+                cx="160"
+                cy="160"
+            />
+        </svg>
+        <div id="breathing-circle">
+            <span id="timer-display">0</span>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="input-group">
+                <label class="text-xs text-slate-500 font-bold uppercase">Inhale</label>
+                <input type="number" id="inhale-input" value="4" min="1" max="60">
+            </div>
+            <div class="input-group">
+                <label class="text-xs text-slate-500 font-bold uppercase">Hold</label>
+                <input type="number" id="hold-input" value="4" min="0" max="60">
+            </div>
+            <div class="input-group">
+                <label class="text-xs text-slate-500 font-bold uppercase">Exhale</label>
+                <input type="number" id="exhale-input" value="4" min="1" max="60">
+            </div>
+        </div>
+        
+        <div class="flex gap-4">
+            <button id="start-btn" class="btn">START</button>
+            <button id="stop-btn" class="btn" disabled>STOP</button>
+        </div>
+
+        <div id="status-text">Ready</div>
+    </div>
+
+    <script>
+        const circleContainer = document.getElementById('circle-container');
+        const timerDisplay = document.getElementById('timer-display');
+        const statusText = document.getElementById('status-text');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const progressCircle = document.querySelector('.progress-ring__circle');
+        
+        const inhaleInput = document.getElementById('inhale-input');
+        const holdInput = document.getElementById('hold-input');
+        const exhaleInput = document.getElementById('exhale-input');
+
+        const CIRCUMFERENCE = 2 * Math.PI * 150;
+        progressCircle.style.strokeDasharray = `${CIRCUMFERENCE} ${CIRCUMFERENCE}`;
+        progressCircle.style.strokeDashoffset = CIRCUMFERENCE;
+
+        let isRunning = false;
+        let animationFrame;
+        
+        function setProgress(percent) {
+            const offset = CIRCUMFERENCE - (percent / 100 * CIRCUMFERENCE);
+            progressCircle.style.strokeDashoffset = offset;
+        }
+
+        async function startBreathing() {
+            if (isRunning) return;
+
+            isRunning = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            runCycle();
+        }
+
+        function stopBreathing() {
+            isRunning = false;
+            cancelAnimationFrame(animationFrame);
+            resetUI();
+        }
+
+        async function runCycle() {
+            while (isRunning) {
+                const inhaleTime = parseInt(inhaleInput.value) * 1000;
+                const holdTime = parseInt(holdInput.value) * 1000;
+                const exhaleTime = parseInt(exhaleInput.value) * 1000;
+
+                // INHALE
+                await animatePhase('Inhale', inhaleTime, (progress) => {
+                    const scale = 1 + (progress * 0.5); // Max scale 1.5
+                    circleContainer.style.transform = `scale(${scale})`;
+                    setProgress(0); // Reset hold ring
+                });
+
+                if (!isRunning) break;
+
+                // HOLD
+                if (holdTime > 0) {
+                    await animatePhase('Hold', holdTime, (progress) => {
+                        setProgress(progress * 100);
+                    });
+                } else {
+                    setProgress(0);
+                }
+
+                if (!isRunning) break;
+
+                // EXHALE
+                await animatePhase('Exhale', exhaleTime, (progress) => {
+                    const scale = 1.5 - (progress * 0.5); // Back to 1.0
+                    circleContainer.style.transform = `scale(${scale})`;
+                    setProgress(100); // Keep ring full
+                });
+            }
+        }
+
+        function animatePhase(label, duration, updateFn) {
+            return new Promise((resolve) => {
+                const startTime = performance.now();
+                statusText.textContent = label;
+
+                function tick(now) {
+                    if (!isRunning) return resolve();
+                    
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Update timer text (countdown style)
+                    const secondsLeft = Math.ceil((duration - elapsed) / 1000);
+                    timerDisplay.textContent = Math.max(secondsLeft, 0);
+
+                    updateFn(progress);
+
+                    if (progress < 1) {
+                        animationFrame = requestAnimationFrame(tick);
+                    } else {
+                        resolve();
+                    }
+                }
+                animationFrame = requestAnimationFrame(tick);
+            });
+        }
+
+        function resetUI() {
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            statusText.textContent = 'Ready';
+            timerDisplay.textContent = '0';
+            circleContainer.style.transform = `scale(1)`;
+            setProgress(0);
+        }
+
+        startBtn.addEventListener('click', startBreathing);
+        stopBtn.addEventListener('click', stopBreathing);
+
+        // Prevent negative or zero values on primary inputs
+        [inhaleInput, exhaleInput].forEach(input => {
+            input.addEventListener('change', () => {
+                if (input.value < 1) input.value = 1;
+            });
+        });
+        holdInput.addEventListener('change', () => {
+            if (holdInput.value < 0) holdInput.value = 0;
+        });
+
+    </script>
+</body>
+</html>
