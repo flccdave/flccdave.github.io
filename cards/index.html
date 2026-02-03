@@ -159,6 +159,7 @@
             margin-bottom: 25px;
             padding-bottom: 25px;
             border-bottom: 1px solid var(--accent-color);
+            transition: opacity 0.3s ease;
         }
         
         .settings-group:last-child {
@@ -943,8 +944,8 @@
             // Re-activate current slide
             goToSlide(currentIndex);
             
-            // Close modal after switching
-            closeSettings();
+            // Enable autoplay controls
+            updateAutoplayAvailability();
         }
 
         function switchToMasonry() {
@@ -971,8 +972,24 @@
             masonryBtn.classList.add('active');
             masonryBtn.setAttribute('aria-pressed', 'true');
             
-            // Close modal after switching
-            closeSettings();
+            // Disable autoplay controls
+            updateAutoplayAvailability();
+        }
+        
+        // Update autoplay control availability based on view mode
+        function updateAutoplayAvailability() {
+            const autoplayGroup = document.querySelector('.settings-group:nth-child(2)');
+            const toggleSwitch = document.getElementById('toggleSwitch');
+            
+            if (isMasonryView) {
+                autoplayGroup.style.opacity = '0.4';
+                autoplayGroup.style.pointerEvents = 'none';
+                toggleSwitch.setAttribute('aria-disabled', 'true');
+            } else {
+                autoplayGroup.style.opacity = '1';
+                autoplayGroup.style.pointerEvents = 'auto';
+                toggleSwitch.setAttribute('aria-disabled', 'false');
+            }
         }
 
         // Event listeners
