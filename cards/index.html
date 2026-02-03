@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Card Carousel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #1a472a;
+            --secondary-color: #c89f5d;
+            --accent-color: #e8d5b5;
+            --text-dark: #2c3e2c;
+            --text-light: #f5f5f0;
+            --bg-main: #faf8f3;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: linear-gradient(135deg, var(--bg-main) 0%, #ede8dd 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+        
+        .carousel-container {
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(26, 71, 42, 0.15);
+            overflow: hidden;
+        }
+        
+        .carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-item {
+            min-width: 100%;
+            padding: 40px;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        
+        .card-item.active {
+            opacity: 1;
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-video {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+        
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        
+        .card-photographer {
+            font-size: 0.95rem;
+            color: var(--secondary-color);
+            font-weight: 400;
+            font-style: italic;
+            margin-bottom: 20px;
+            letter-spacing: 0.02em;
+        }
+        
+        .card-body-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-dark);
+            font-weight: 300;
+        }
+        
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--primary-color);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(8px);
+        }
+        
+        .nav-arrow:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .nav-arrow:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 3px;
+        }
+        
+        .nav-arrow.prev {
+            left: 20px;
+        }
+        
+        .nav-arrow.next {
+            right: 20px;
+        }
+        
+        .controls-container {
+            padding: 30px 40px;
+            background: linear-gradient(180deg, transparent 0%, rgba(26, 71, 42, 0.03) 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(26, 71, 42, 0.1);
+        }
+        
+        .dots-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex: 1;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            border: 2px solid var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .dot:hover {
+            transform: scale(1.2);
+            background: var(--secondary-color);
+        }
+        
+        .dot:focus {
+            outline: 3px solid var(--secondary-color);
+            outline-offset: 3px;
+        }
+        
+        .dot.active {
+            background: var(--primary-color);
+            transform: scale(1.3);
+        }
+        
+        .dot::after {
+            content: attr(aria-label);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            color: var(--text-dark);
+        }
+        
+        .dot:hover::after,
+        .dot:focus::after {
+            opacity: 1;
+        }
+        
+        .autoplay-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ddd;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .toggle-switch:focus {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 3px;
+        }
+        
+        .toggle-switch.active {
+            background: var(--primary-color);
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+        
+        @media (max-width: 768px) {
+            .card-item {
+                padding: 30px 20px;
+            }
+            
+            .card-title {
+                font-size: 2rem;
+            }
+            
+            .card-body-text {
+                font-size: 1rem;
+            }
+            
+            .card-image {
+                height: 200px;
+            }
+            
+            .card-video {
+                height: 200px;
+            }
+            
+            .nav-arrow {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .nav-arrow.prev {
+                left: 10px;
+            }
+            
+            .nav-arrow.next {
+                right: 10px;
+            }
+            
+            .controls-container {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .carousel-wrapper {
+                min-height: 400px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card-title {
+                font-size: 1.6rem;
+            }
+            
+            .card-body-text {
+                font-size: 0.95rem;
+            }
+            
+            .card-image {
+                height: 180px;
+            }
+            
+            .card-video {
+                height: 180px;
+            }
+        }
+
+        /* Keyboard focus indicators */
+        *:focus-visible {
+            outline: 3px solid var(--secondary-color);
+            outline-offset: 3px;
+        }
+
+        /* Screen reader only class */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="carousel-container" role="region" aria-label="Image carousel" aria-live="polite">
+        <div class="carousel-wrapper">
+            <button class="nav-arrow prev" aria-label="Previous card" id="prevBtn">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            
+            <div class="carousel-track" id="carouselTrack">
+                <!-- Cards will be dynamically generated here -->
+            </div>
+            
+            <button class="nav-arrow next" aria-label="Next card" id="nextBtn">
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            </button>
+        </div>
+        
+        <div class="controls-container">
+            <div class="dots-container" id="dotsContainer" role="tablist" aria-label="Carousel navigation">
+                <!-- Dots will be dynamically generated here -->
+            </div>
+            
+            <div class="autoplay-toggle">
+                <span id="autoplayLabel">Auto-advance</span>
+                <div 
+                    class="toggle-switch" 
+                    id="toggleSwitch" 
+                    role="switch" 
+                    aria-checked="false" 
+                    aria-labelledby="autoplayLabel"
+                    tabindex="0"
+                >
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CARD DATA - EASY TO EDIT!
+        // ============================================
+        // Each card can have either an 'image' OR a 'youtubeId'
+        // - For images: use 'image' and 'imageAlt'
+        // - For YouTube videos: use 'youtubeId' (just the video ID from the URL)
+        const cardsData = [
+            {
+                image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
+                imageAlt: 'Majestic mountain peak covered in snow against a clear blue sky',
+                title: 'Mountain Serenity',
+                photographer: 'Elena Rodriguez',
+                body: 'Discover the tranquil beauty of towering peaks where earth meets sky. These natural monuments have stood for millennia, witnessing the passage of time and offering refuge to those seeking peace and perspective. The crisp mountain air and breathtaking vistas remind us of nature\'s grandeur and our place within it.'
+            },
+            {
+                youtubeId: 'dQw4w9WgXcQ',
+                title: 'Cosmic Wonder',
+                photographer: 'Marcus Chen',
+                body: 'Gaze into the infinite expanse of our universe, where billions of stars paint the canvas of night. The cosmos beckons us to dream bigger, to question deeper, and to recognize the extraordinary beauty that exists beyond our atmosphere. Each point of light represents a sun, perhaps with its own worlds orbiting in the darkness.'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop',
+                imageAlt: 'Gentle ocean waves rolling onto a pristine sandy beach at sunset',
+                title: 'Ocean Dreams',
+                photographer: 'Sofia Andersson',
+                body: 'Feel the rhythm of the tides as waves caress the shoreline in an eternal dance. The ocean holds mysteries in its depths and offers solace on its shores. Its vast blue expanse connects continents and cultures, while the sound of crashing waves provides nature\'s most soothing symphony for the soul.'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=800&h=600&fit=crop',
+                imageAlt: 'Lush green forest with sunlight filtering through tall trees',
+                title: 'Forest Sanctuary',
+                photographer: 'James O\'Brien',
+                body: 'Step into the cathedral of ancient trees where sunlight filters through emerald canopies. The forest breathes life into our world, purifying air and providing habitat for countless species. In this green sanctuary, time moves differently, and the whispers of leaves tell stories written over centuries of growth and renewal.'
+            },
+            {
+                image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=600&fit=crop',
+                imageAlt: 'Vibrant desert landscape with red rock formations under golden hour light',
+                title: 'Desert Majesty',
+                photographer: 'Amara Okafor',
+                body: 'Witness the stark beauty of endless sands and sculptured stone, where life persists against all odds. The desert teaches resilience and adaptation, showcasing how beauty can flourish in the harshest conditions. As the sun paints the landscape in hues of amber and crimson, the desert reveals its hidden magic.'
+            }
+        ];
+
+        // ============================================
+        // CAROUSEL FUNCTIONALITY
+        // ============================================
+        let currentIndex = 0;
+        let autoplayInterval = null;
+        let isAutoplayActive = false;
+        const AUTOPLAY_DELAY = 3000; // milliseconds
+
+        // Generate cards dynamically
+        function generateCards() {
+            const track = document.getElementById('carouselTrack');
+            const dotsContainer = document.getElementById('dotsContainer');
+            
+            cardsData.forEach((card, index) => {
+                // Create card
+                const cardElement = document.createElement('div');
+                cardElement.className = `card-item ${index === 0 ? 'active' : ''}`;
+                cardElement.setAttribute('role', 'tabpanel');
+                cardElement.setAttribute('aria-label', `Card ${index + 1} of ${cardsData.length}: ${card.title}`);
+                
+                // Determine if this card has an image or YouTube video
+                let mediaHTML = '';
+                if (card.youtubeId) {
+                    mediaHTML = `<iframe 
+                        class="card-video" 
+                        src="https://www.youtube.com/embed/${card.youtubeId}" 
+                        title="${card.title} - Video"
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                    </iframe>`;
+                } else if (card.image) {
+                    mediaHTML = `<img src="${card.image}" alt="${card.imageAlt}" class="card-image">`;
+                }
+                
+                cardElement.innerHTML = `
+                    ${mediaHTML}
+                    <h2 class="card-title">${card.title}</h2>
+                    <p class="card-photographer">Photography by ${card.photographer}</p>
+                    <p class="card-body-text">${card.body}</p>
+                `;
+                track.appendChild(cardElement);
+                
+                // Create dot
+                const dot = document.createElement('div');
+                dot.className = `dot ${index === 0 ? 'active' : ''}`;
+                dot.setAttribute('role', 'tab');
+                dot.setAttribute('aria-label', `Go to card ${index + 1}: ${card.title}`);
+                dot.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+                dot.setAttribute('tabindex', index === 0 ? '0' : '-1');
+                dot.addEventListener('click', () => goToSlide(index));
+                dot.addEventListener('keydown', (e) => handleDotKeydown(e, index));
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        // Navigate to specific slide
+        function goToSlide(index) {
+            if (index < 0 || index >= cardsData.length) return;
+            
+            const track = document.getElementById('carouselTrack');
+            const cards = track.querySelectorAll('.card-item');
+            const dots = document.querySelectorAll('.dot');
+            
+            // Update active states
+            cards[currentIndex].classList.remove('active');
+            dots[currentIndex].classList.remove('active');
+            dots[currentIndex].setAttribute('aria-selected', 'false');
+            dots[currentIndex].setAttribute('tabindex', '-1');
+            
+            currentIndex = index;
+            
+            cards[currentIndex].classList.add('active');
+            dots[currentIndex].classList.add('active');
+            dots[currentIndex].setAttribute('aria-selected', 'true');
+            dots[currentIndex].setAttribute('tabindex', '0');
+            
+            // Transform the track
+            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            
+            // Announce to screen readers
+            announceSlideChange();
+        }
+
+        // Next slide
+        function nextSlide() {
+            goToSlide((currentIndex + 1) % cardsData.length);
+        }
+
+        // Previous slide
+        function prevSlide() {
+            goToSlide((currentIndex - 1 + cardsData.length) % cardsData.length);
+        }
+
+        // Autoplay functions
+        function startAutoplay() {
+            if (autoplayInterval) clearInterval(autoplayInterval);
+            autoplayInterval = setInterval(nextSlide, AUTOPLAY_DELAY);
+        }
+
+        function stopAutoplay() {
+            if (autoplayInterval) {
+                clearInterval(autoplayInterval);
+                autoplayInterval = null;
+            }
+        }
+
+        function toggleAutoplay() {
+            const toggleSwitch = document.getElementById('toggleSwitch');
+            isAutoplayActive = !isAutoplayActive;
+            
+            if (isAutoplayActive) {
+                toggleSwitch.classList.add('active');
+                toggleSwitch.setAttribute('aria-checked', 'true');
+                startAutoplay();
+            } else {
+                toggleSwitch.classList.remove('active');
+                toggleSwitch.setAttribute('aria-checked', 'false');
+                stopAutoplay();
+            }
+        }
+
+        // Keyboard navigation for dots
+        function handleDotKeydown(e, index) {
+            const dots = document.querySelectorAll('.dot');
+            let newIndex = index;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    newIndex = (index - 1 + cardsData.length) % cardsData.length;
+                    break;
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    newIndex = (index + 1) % cardsData.length;
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    newIndex = 0;
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    newIndex = cardsData.length - 1;
+                    break;
+                default:
+                    return;
+            }
+            
+            goToSlide(newIndex);
+            dots[newIndex].focus();
+        }
+
+        // Announce slide change to screen readers
+        function announceSlideChange() {
+            const announcement = document.createElement('div');
+            announcement.className = 'sr-only';
+            announcement.setAttribute('role', 'status');
+            announcement.setAttribute('aria-live', 'polite');
+            announcement.textContent = `Now showing card ${currentIndex + 1} of ${cardsData.length}: ${cardsData[currentIndex].title}`;
+            document.body.appendChild(announcement);
+            setTimeout(() => announcement.remove(), 1000);
+        }
+
+        // Event listeners
+        document.getElementById('prevBtn').addEventListener('click', prevSlide);
+        document.getElementById('nextBtn').addEventListener('click', nextSlide);
+        document.getElementById('toggleSwitch').addEventListener('click', toggleAutoplay);
+
+        // Keyboard support for toggle switch
+        document.getElementById('toggleSwitch').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleAutoplay();
+            }
+        });
+
+        // Keyboard navigation for arrow keys
+        document.addEventListener('keydown', (e) => {
+            if (e.target.classList.contains('dot')) return; // Let dots handle their own navigation
+            
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                nextSlide();
+            }
+        });
+
+        // Pause autoplay on hover or focus
+        const carouselContainer = document.querySelector('.carousel-container');
+        carouselContainer.addEventListener('mouseenter', () => {
+            if (isAutoplayActive) stopAutoplay();
+        });
+        carouselContainer.addEventListener('mouseleave', () => {
+            if (isAutoplayActive) startAutoplay();
+        });
+        carouselContainer.addEventListener('focusin', () => {
+            if (isAutoplayActive) stopAutoplay();
+        });
+        carouselContainer.addEventListener('focusout', () => {
+            if (isAutoplayActive) startAutoplay();
+        });
+
+        // Initialize carousel
+        generateCards();
+    </script>
+</body>
+</html>
