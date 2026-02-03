@@ -49,11 +49,25 @@
             position: relative;
             overflow: hidden;
             min-height: 500px;
+            transition: min-height 0.3s ease;
+        }
+        
+        .carousel-wrapper.masonry-view {
+            overflow: visible;
+            min-height: auto;
         }
         
         .carousel-track {
             display: flex;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .carousel-track.masonry-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px;
+            transform: none !important;
         }
         
         .card-item {
@@ -65,6 +79,48 @@
         
         .card-item.active {
             opacity: 1;
+        }
+        
+        .masonry-view .card-item {
+            min-width: auto;
+            opacity: 1;
+            padding: 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .masonry-view .card-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .masonry-view .card-item > * {
+            padding: 0 25px;
+        }
+        
+        .masonry-view .card-image,
+        .masonry-view .card-video {
+            margin-bottom: 20px;
+            border-radius: 0;
+            padding: 0;
+        }
+        
+        .masonry-view .card-title {
+            padding-top: 0;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        
+        .masonry-view .card-photographer {
+            margin-bottom: 15px;
+        }
+        
+        .masonry-view .card-body-text {
+            padding-bottom: 25px;
+            font-size: 1rem;
         }
         
         .card-image {
@@ -132,6 +188,10 @@
             backdrop-filter: blur(8px);
         }
         
+        .masonry-view .nav-arrow {
+            display: none;
+        }
+        
         .nav-arrow:hover {
             background: rgba(255, 255, 255, 0.95);
             transform: translateY(-50%) scale(1.1);
@@ -154,9 +214,19 @@
             padding: 30px 40px;
             background: linear-gradient(180deg, transparent 0%, rgba(26, 71, 42, 0.03) 100%);
             display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border-top: 1px solid rgba(26, 71, 42, 0.1);
+        }
+        
+        .controls-row {
+            display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid rgba(26, 71, 42, 0.1);
+        }
+        
+        .controls-row.center {
+            justify-content: center;
         }
         
         .dots-container {
@@ -164,6 +234,12 @@
             gap: 12px;
             justify-content: center;
             flex: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .dots-container.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         
         .dot {
@@ -217,6 +293,52 @@
             font-size: 0.95rem;
             color: var(--text-dark);
             font-weight: 600;
+        }
+        
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        
+        .view-buttons {
+            display: flex;
+            gap: 5px;
+            background: var(--accent-color);
+            padding: 4px;
+            border-radius: 8px;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-dark);
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .view-btn:hover {
+            background: rgba(26, 71, 42, 0.1);
+        }
+        
+        .view-btn.active {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+        
+        .view-btn:focus {
+            outline: 3px solid var(--secondary-color);
+            outline-offset: 2px;
         }
         
         .toggle-switch {
@@ -291,13 +413,22 @@
             }
             
             .controls-container {
-                flex-direction: column;
-                gap: 20px;
                 padding: 20px;
+            }
+            
+            .controls-row {
+                flex-direction: column;
+                gap: 15px;
             }
             
             .carousel-wrapper {
                 min-height: 400px;
+            }
+            
+            .carousel-track.masonry-view {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
             }
         }
         
@@ -356,21 +487,39 @@
         </div>
         
         <div class="controls-container">
-            <div class="dots-container" id="dotsContainer" role="tablist" aria-label="Carousel navigation">
-                <!-- Dots will be dynamically generated here -->
+            <div class="controls-row">
+                <div class="dots-container" id="dotsContainer" role="tablist" aria-label="Carousel navigation">
+                    <!-- Dots will be dynamically generated here -->
+                </div>
+                
+                <div class="autoplay-toggle">
+                    <span id="autoplayLabel">Auto-advance</span>
+                    <div 
+                        class="toggle-switch" 
+                        id="toggleSwitch" 
+                        role="switch" 
+                        aria-checked="false" 
+                        aria-labelledby="autoplayLabel"
+                        tabindex="0"
+                    >
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
             </div>
             
-            <div class="autoplay-toggle">
-                <span id="autoplayLabel">Auto-advance</span>
-                <div 
-                    class="toggle-switch" 
-                    id="toggleSwitch" 
-                    role="switch" 
-                    aria-checked="false" 
-                    aria-labelledby="autoplayLabel"
-                    tabindex="0"
-                >
-                    <div class="toggle-slider"></div>
+            <div class="controls-row center">
+                <div class="view-toggle">
+                    <span>View:</span>
+                    <div class="view-buttons" role="group" aria-label="View mode selection">
+                        <button class="view-btn active" id="carouselViewBtn" aria-pressed="true">
+                            <i class="fas fa-images" aria-hidden="true"></i>
+                            Carousel
+                        </button>
+                        <button class="view-btn" id="masonryViewBtn" aria-pressed="false">
+                            <i class="fas fa-th" aria-hidden="true"></i>
+                            Masonry
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -426,6 +575,7 @@
         let currentIndex = 0;
         let autoplayInterval = null;
         let isAutoplayActive = false;
+        let isMasonryView = false;
         const AUTOPLAY_DELAY = 3000; // milliseconds
 
         // Generate cards dynamically
@@ -445,11 +595,12 @@
                 if (card.youtubeId) {
                     mediaHTML = `<iframe 
                         class="card-video" 
-                        src="https://www.youtube.com/embed/${card.youtubeId}" 
+                        src="https://www.youtube-nocookie.com/embed/${card.youtubeId}?enablejsapi=1&origin=https://example.com" 
                         title="${card.title} - Video"
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen>
+                        allowfullscreen
+                        referrerpolicy="strict-origin-when-cross-origin">
                     </iframe>`;
                 } else if (card.image) {
                     mediaHTML = `<img src="${card.image}" alt="${card.imageAlt}" class="card-image">`;
@@ -585,10 +736,61 @@
             setTimeout(() => announcement.remove(), 1000);
         }
 
+        // View toggle functions
+        function switchToCarousel() {
+            if (!isMasonryView) return;
+            
+            isMasonryView = false;
+            const wrapper = document.querySelector('.carousel-wrapper');
+            const track = document.getElementById('carouselTrack');
+            const dotsContainer = document.getElementById('dotsContainer');
+            const carouselBtn = document.getElementById('carouselViewBtn');
+            const masonryBtn = document.getElementById('masonryViewBtn');
+            
+            wrapper.classList.remove('masonry-view');
+            track.classList.remove('masonry-view');
+            dotsContainer.classList.remove('hidden');
+            
+            carouselBtn.classList.add('active');
+            carouselBtn.setAttribute('aria-pressed', 'true');
+            masonryBtn.classList.remove('active');
+            masonryBtn.setAttribute('aria-pressed', 'false');
+            
+            // Re-activate current slide
+            goToSlide(currentIndex);
+        }
+
+        function switchToMasonry() {
+            if (isMasonryView) return;
+            
+            isMasonryView = true;
+            const wrapper = document.querySelector('.carousel-wrapper');
+            const track = document.getElementById('carouselTrack');
+            const dotsContainer = document.getElementById('dotsContainer');
+            const carouselBtn = document.getElementById('carouselViewBtn');
+            const masonryBtn = document.getElementById('masonryViewBtn');
+            
+            // Stop autoplay if active
+            if (isAutoplayActive) {
+                toggleAutoplay();
+            }
+            
+            wrapper.classList.add('masonry-view');
+            track.classList.add('masonry-view');
+            dotsContainer.classList.add('hidden');
+            
+            carouselBtn.classList.remove('active');
+            carouselBtn.setAttribute('aria-pressed', 'false');
+            masonryBtn.classList.add('active');
+            masonryBtn.setAttribute('aria-pressed', 'true');
+        }
+
         // Event listeners
         document.getElementById('prevBtn').addEventListener('click', prevSlide);
         document.getElementById('nextBtn').addEventListener('click', nextSlide);
         document.getElementById('toggleSwitch').addEventListener('click', toggleAutoplay);
+        document.getElementById('carouselViewBtn').addEventListener('click', switchToCarousel);
+        document.getElementById('masonryViewBtn').addEventListener('click', switchToMasonry);
 
         // Keyboard support for toggle switch
         document.getElementById('toggleSwitch').addEventListener('keydown', (e) => {
@@ -600,6 +802,7 @@
 
         // Keyboard navigation for arrow keys
         document.addEventListener('keydown', (e) => {
+            if (isMasonryView) return; // Disable arrow navigation in masonry view
             if (e.target.classList.contains('dot')) return; // Let dots handle their own navigation
             
             if (e.key === 'ArrowLeft') {
