@@ -690,10 +690,70 @@
         </div>
     </div>
 
-    <script src="cards02.js"></script>
-    
     <script>
-
+        // ============================================
+        // CARD DATA - DYNAMICALLY LOADED
+        // ============================================
+        // Cards will be loaded from an external file specified by URL parameter
+        // Usage: index.html?deck=cards01 (loads cards01.js)
+        // The external file should define: window.cardsData = [...]
+        
+        let cardsData = [];
+        
+        // Function to get URL parameter
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // Function to load card deck from external file
+        function loadCardDeck() {
+            return new Promise((resolve, reject) => {
+                const deckName = getUrlParameter('deck');
+                
+                // Default deck if no parameter specified
+                const fileName = deckName ? `${deckName}.js` : 'cards01.js';
+                
+                const script = document.createElement('script');
+                script.src = fileName;
+                
+                script.onload = () => {
+                    // Check if cardsData was loaded
+                    if (window.cardsData && Array.isArray(window.cardsData) && window.cardsData.length > 0) {
+                        cardsData = window.cardsData;
+                        resolve(cardsData);
+                    } else {
+                        reject(new Error('Card data is invalid or empty'));
+                    }
+                };
+                
+                script.onerror = () => {
+                    reject(new Error(`Failed to load deck: ${fileName}`));
+                };
+                
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Function to show error message
+        function showError(message) {
+            const container = document.querySelector('.carousel-container');
+            container.innerHTML = `
+                <div style="padding: 60px 40px; text-align: center;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--secondary-color); margin-bottom: 20px;"></i>
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--primary-color); margin-bottom: 15px;">Deck Not Found</h2>
+                    <p style="color: var(--text-dark); margin-bottom: 30px; font-size: 1.1rem;">${message}</p>
+                    <div style="background: var(--accent-color); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                        <p style="font-weight: 600; margin-bottom: 10px; color: var(--text-dark);">Usage:</p>
+                        <code style="background: white; padding: 8px 12px; border-radius: 6px; display: inline-block; color: var(--primary-color);">index.html?deck=cards01</code>
+                        <p style="margin-top: 15px; font-size: 0.95rem; color: var(--text-dark);">Make sure your deck file exists and defines <code style="background: white; padding: 2px 6px; border-radius: 3px;">window.cardsData</code></p>
+                    </div>
+                </div>
+            `;
+            
+            // Hide settings button on error
+            document.getElementById('settingsFab').style.display = 'none';
+        }
 
         // ============================================
         // CAROUSEL FUNCTIONALITY
@@ -1020,8 +1080,16 @@
             if (isAutoplayActive) startAutoplay();
         });
 
-        // Initialize carousel
-        generateCards();
+        // Initialize carousel - load deck then generate cards
+        loadCardDeck()
+            .then(() => {
+                generateCards();
+                console.log(`Successfully loaded deck with ${cardsData.length} cards`);
+            })
+            .catch((error) => {
+                console.error('Error loading deck:', error);
+                showError(error.message);
+            });
     </script>
 </body>
 </html>
