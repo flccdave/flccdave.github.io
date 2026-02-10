@@ -1,4 +1,6 @@
 // Literature Flashcard Data
+console.log("literature.js: Attempting to load Literature cards...");
+
 const literatureCards = [
     { q: "Who wrote 'Romeo and Juliet'?", a: "William Shakespeare" },
     { q: "What is the name of the whale in Herman Melville's famous novel?", a: "Moby Dick" },
@@ -10,4 +12,7 @@ const literatureCards = [
 // Register the subject with the main application
 if (typeof registerSubject === 'function') {
     registerSubject('literature', literatureCards);
+    console.log("literature.js: Successfully registered 'literature' subject.");
+} else {
+    console.error("literature.js: Failed to register. 'registerSubject' function not found. Ensure index.html is loaded first.");
 }
