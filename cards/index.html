@@ -714,21 +714,39 @@
                 // Default deck if no parameter specified
                 const fileName = deckName ? `${deckName}.js` : 'cards01.js';
                 
+                console.log(`Attempting to load deck: ${fileName}`);
+                
                 const script = document.createElement('script');
                 script.src = fileName;
+                script.type = 'text/javascript';
+                
+                // Set a timeout in case the script never loads
+                const timeout = setTimeout(() => {
+                    reject(new Error(`Timeout loading deck: ${fileName}. The file may not exist or there may be a CORS issue.`));
+                }, 5000);
                 
                 script.onload = () => {
-                    // Check if cardsData was loaded
-                    if (window.cardsData && Array.isArray(window.cardsData) && window.cardsData.length > 0) {
-                        cardsData = window.cardsData;
-                        resolve(cardsData);
-                    } else {
-                        reject(new Error('Card data is invalid or empty'));
-                    }
+                    clearTimeout(timeout);
+                    console.log('Script loaded, checking for cardsData...');
+                    
+                    // Give a small delay to ensure the script has executed
+                    setTimeout(() => {
+                        // Check if cardsData was loaded
+                        if (window.cardsData && Array.isArray(window.cardsData) && window.cardsData.length > 0) {
+                            console.log(`Found ${window.cardsData.length} cards`);
+                            cardsData = window.cardsData;
+                            resolve(cardsData);
+                        } else {
+                            console.error('window.cardsData:', window.cardsData);
+                            reject(new Error(`Card data is invalid or empty. Make sure ${fileName} defines window.cardsData as an array.`));
+                        }
+                    }, 100);
                 };
                 
-                script.onerror = () => {
-                    reject(new Error(`Failed to load deck: ${fileName}`));
+                script.onerror = (error) => {
+                    clearTimeout(timeout);
+                    console.error('Script load error:', error);
+                    reject(new Error(`Failed to load deck file: ${fileName}. Check that the file exists and is accessible.`));
                 };
                 
                 document.head.appendChild(script);
