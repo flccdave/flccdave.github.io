@@ -1,42 +1,40 @@
-        // ============================================
-        // CARD DATA - EASY TO EDIT!
-        // ============================================
-        // Each card can have either an 'image' OR a 'youtubeId'
-        // - For images: use 'image' and 'imageAlt'
-        // - For YouTube videos: use 'youtubeId' (just the video ID from the URL)
-        const cardsData = [
-            {
-                image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
-                imageAlt: 'Majestic mountain peak covered in snow against a clear blue sky',
-                title: 'THIS IS CARDS 2',
-                photographer: 'Elena Rodriguez',
-                body: 'Discover the tranquil beauty of towering peaks where earth meets sky. These natural monuments have stood for millennia, witnessing the passage of time and offering refuge to those seeking peace and perspective. The crisp mountain air and breathtaking vistas remind us of nature\'s grandeur and our place within it.'
-            },
-            {
-                youtubeId: 'dQw4w9WgXcQ',
-                title: 'Cosmic Wonder',
-                photographer: 'Marcus Chen',
-                body: 'Gaze into the infinite expanse of our universe, where billions of stars paint the canvas of night. The cosmos beckons us to dream bigger, to question deeper, and to recognize the extraordinary beauty that exists beyond our atmosphere. Each point of light represents a sun, perhaps with its own worlds orbiting in the darkness.'
-            },
-            {
-                image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&h=600&fit=crop',
-                imageAlt: 'Gentle ocean waves rolling onto a pristine sandy beach at sunset',
-                title: 'Ocean Dreams',
-                photographer: 'Sofia Andersson',
-                body: 'Feel the rhythm of the tides as waves caress the shoreline in an eternal dance. The ocean holds mysteries in its depths and offers solace on its shores. Its vast blue expanse connects continents and cultures, while the sound of crashing waves provides nature\'s most soothing symphony for the soul.'
-            },
-            {
-                image: 'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=800&h=600&fit=crop',
-                imageAlt: 'Lush green forest with sunlight filtering through tall trees',
-                title: 'Forest Sanctuary',
-                photographer: 'James O\'Brien',
-                body: 'Step into the cathedral of ancient trees where sunlight filters through emerald canopies. The forest breathes life into our world, purifying air and providing habitat for countless species. In this green sanctuary, time moves differently, and the whispers of leaves tell stories written over centuries of growth and renewal.'
-            },
-            {
-                image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=600&fit=crop',
-                imageAlt: 'Vibrant desert landscape with red rock formations under golden hour light',
-                title: 'Desert Majesty',
-                photographer: 'Amara Okafor',
-                body: 'Witness the stark beauty of endless sands and sculptured stone, where life persists against all odds. The desert teaches resilience and adaptation, showcasing how beauty can flourish in the harshest conditions. As the sun paints the landscape in hues of amber and crimson, the desert reveals its hidden magic.'
-            }
-        ];
+// ============================================
+// EXAMPLE DECK 02 - Technology & Innovation
+// ============================================
+
+(function() {
+    'use strict';
+    
+    window.cardsData = [
+        {
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=600&fit=crop',
+            imageAlt: 'Modern technology workspace with multiple screens displaying code',
+            title: 'Digital Revolution',
+            photographer: 'Alex Kim',
+            body: 'We stand at the forefront of unprecedented technological change. From artificial intelligence to quantum computing, innovations are reshaping how we live, work, and connect. The digital age has democratized information and empowered billions to create, share, and collaborate across borders.'
+        },
+        {
+            image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=600&fit=crop',
+            imageAlt: 'Earth from space showing city lights at night',
+            title: 'Connected World',
+            photographer: 'Sarah Mitchell',
+            body: 'Our planet has become a web of interconnected networks. Fiber optic cables span oceans, satellites orbit overhead, and wireless signals blanket cities. This infrastructure enables instant communication, real-time collaboration, and access to humanity\'s collective knowledge at our fingertips.'
+        },
+        {
+            image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=600&fit=crop',
+            imageAlt: 'Robotic arm assembling circuit boards in a modern factory',
+            title: 'Automation Era',
+            photographer: 'David Park',
+            body: 'Machines are becoming our partners in productivity. Robotics and automation handle repetitive tasks with precision, freeing humans to focus on creativity and problem-solving. This partnership between human ingenuity and machine efficiency is transforming industries worldwide.'
+        },
+        {
+            image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&h=600&fit=crop',
+            imageAlt: 'Futuristic data visualization with glowing network connections',
+            title: 'Data Intelligence',
+            photographer: 'Maya Patel',
+            body: 'Data has become the new currency of innovation. Machine learning algorithms find patterns in vast datasets, revealing insights that drive decisions across healthcare, finance, and science. The ability to harness information intelligently defines success in the modern world.'
+        }
+    ];
+    
+    console.log('cards02.js loaded successfully with', window.cardsData.length, 'cards');
+})();
