@@ -62,6 +62,9 @@
         <?php
         // Define the directory to scan (current directory)
         $directory = './';
+        
+        // Determine the current URL path to ensure links are relative to the current folder
+        $currentPath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/';
 
         // Scan the directory
         $files = scandir($directory);
@@ -71,9 +74,14 @@
 
         if (count($filteredFiles) > 0) {
             foreach ($filteredFiles as $file) {
-                // Ensure we don't link to directories in this simple list, or handle them specifically
+                // Determine if item is a directory
                 $isDir = is_dir($file) ? ' [Dir]' : '';
-                echo '<li><a class="file-link" href="' . htmlspecialchars($file) . '">' . htmlspecialchars($file) . $isDir . '</a></li>';
+                
+                // Construct the link using the current path prefix
+                $fileUrl = $currentPath . rawurlencode($file);
+                
+                echo '<li><a class="file-link" href="' . htmlspecialchars($fileUrl) . '">' . htmlspecialchars($file) . $isDir . '</a></li><br />';
+                echo '';
             }
         } else {
             echo '<li class="empty-msg">No files found in this directory.</li>';

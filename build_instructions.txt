@@ -1,0 +1,17 @@
+Build a portfolio landing page at `index.html`. Scan all subfolders for any that contain an `index.html` file — each one is a potential card. Read the following `meta` tags from each subfolder's `index.html`:
+
+- `portfolio:title` — card heading
+- `portfolio:description` — card body text
+- `portfolio:display` — `YES` to show, `NO` to hide
+- `portfolio:thumb` — thumbnail filename, assumed to be in the same folder as the `index.html`
+- `portfolio:link` — optional external URL; if absent, link to that subfolder's `index.html`
+
+Add those meta tags to any subfolder `index.html` that's missing them, using reasonable titles and descriptions inferred from the page content.
+
+The landing page should:
+- Say "Dave's Portfolio" at the top
+- Show one card per subfolder where `portfolio:display` is `YES`
+- Use JavaScript to fetch and parse each subfolder's `index.html` at runtime so no rebuild is needed when content changes
+- Display thumbnails at a 16:9 aspect ratio; show a placeholder if no thumb is provided
+- Use font: Atkinson Hyperlegible 14pt, color #0046ad, light blue-gray background
+- Use a responsive card grid with hover lift effect
